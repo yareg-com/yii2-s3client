@@ -1,10 +1,9 @@
 # yii2-S3Client
 
-[![Latest Stable Version](https://poser.pugx.org/grptx/yii2-s3client/v/stable)](https://packagist.org/packages/grptx/yii2-s3client)
-[![Total Downloads](https://poser.pugx.org/grptx/yii2-s3client/downloads)](https://packagist.org/packages/grptx/yii2-s3client)
-[![Latest Unstable Version](https://poser.pugx.org/grptx/yii2-s3client/v/unstable)](https://packagist.org/packages/grptx/yii2-s3client)
-[![License](https://poser.pugx.org/grptx/yii2-s3client/license)](https://packagist.org/packages/grptx/yii2-s3client)
-[![composer.lock available](https://poser.pugx.org/grptx/yii2-s3client/composerlock)](https://packagist.org/packages/phpunit/phpunit)
+[![Latest Stable Version](https://poser.pugx.org/yareg/yii2-s3client/v)](//packagist.org/packages/yareg/yii2-s3client)
+[![Latest Unstable Version](https://poser.pugx.org/yareg/yii2-s3client/v/unstable)](//packagist.org/packages/yareg/yii2-s3client)
+[![License](https://poser.pugx.org/yareg/yii2-s3client/license)](//packagist.org/packages/yareg/yii2-s3client)
+[![Total Downloads](https://poser.pugx.org/yareg/yii2-s3client/downloads)](//packagist.org/packages/yareg/yii2-s3client)
 
 Yii2 S3Client based on [klinson/aws-s3-minio](https://github.com/klinson/aws-s3-minio)
 
@@ -12,12 +11,12 @@ Yii2 S3Client based on [klinson/aws-s3-minio](https://github.com/klinson/aws-s3-
 
 Preferred way to install is through [Composer](https://getcomposer.org): 
 ```shell
-php composer.phar require grptx/yii2-s3client:^1
+php composer.phar require yareg/yii2-s3client:^1
 ```
 Or, you may add
 
 ```php
-"grptx/yii2-s3client": "^1"
+"yareg/yii2-s3client": "^1"
 ```
 
 to the require section of your `composer.json` file and execute `php composer.phar update`.
