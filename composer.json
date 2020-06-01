@@ -1,11 +1,16 @@
 {
-    "name": "grptx/yii2-s3client",
+    "name": "yareg/yii2-s3client",
+    "description": "Amazon S3 / MinIO client extension for Yii2 framework",
     "type": "yii2-component",
     "license": "MIT",
     "authors": [
         {
             "name": "roberto rossetti",
             "email": "robertorossetti3.14@gmail.com"
+        },
+        {
+            "name": "Yar Rick",
+            "email": "yar@yareg.com"
         }
     ],
     "keywords": [
@@ -17,12 +22,13 @@
     ],
     "minimum-stability": "dev",
     "require": {
+        "php": ">=7.0",
         "yiisoft/yii2": "^2",
         "aws/aws-sdk-php": "^3"
     },
     "autoload": {
         "psr-4": {
-            "grptx\\": "src"
+            "yareg\\": "src"
         }
     }
 }

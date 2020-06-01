@@ -1,6 +1,6 @@
 <?php
 
-namespace grptx;
+namespace yareg;
 
 use Aws\Acm\Exception\AcmException;
 use Aws\Exception\AwsException;
@@ -10,70 +10,58 @@ use yii\base\Component;
 class S3Client extends Component
 {
     /** @var \Aws\S3\S3Client */
-    private $S3Client;
+    private $client;
 
     public $key;
-
     public $secret;
-
     public $region;
-
     public $version = 'latest';
-
     public $endpoint;
-
     public $profile = 'default';
-
     public $defaultBucket;
-
     public $debug = false;
-
-    public $http = [
-        'verify' => true
-    ];
+    public $http = ['verify' => true];
 
     public function init()
     {
         parent::init();
-        if (!$this->S3Client) {
-            $this->getS3Client();
-        }
-    }
 
+        $this->client = new \Aws\S3\S3Client([
+            'credentials' => [
+                'key'    => $this->key ?? '',
+                'secret' => $this->secret ?? '',
+            ],
+            'region'                  => $this->region ?? '',
+            'version'                 => $this->version ?? 'latest',
+            'endpoint'                => $this->endpoint ?? '',
+            'use_path_style_endpoint' => true,
+            'debug'                   => $this->debug,
+            'http'                    => $this->http
+        ]);
+    }
 
     /**
      * @return \Aws\S3\S3Client
      */
-    public function getS3Client(): \Aws\S3\S3Client
+    private function getClient(): \Aws\S3\S3Client
     {
-        if (!$this->S3Client) {
-            $this->S3Client = new \Aws\S3\S3Client([
-                'credentials' => [
-                    'key' => $this->key ?? '',
-                    'secret' => $this->secret ?? '',
-                ],
-                'region' => $this->region ?? '',
-                'version' => $this->version ?? 'latest',
-                'endpoint' => $this->endpoint ?? '',
-                'use_path_style_endpoint' => true,
-                'debug' => $this->debug,
-                'http' => $this->http
-            ]);
-        }
-
-        return $this->S3Client;
+        return $this->client;
     }
 
+    /**
+     * @param String|null $bucket
+     * @return bool
+     */
     public function createBucket(String $bucket = null)
     {
         if (is_null($bucket)) {
             return false;
         }
+
         try {
-            $result = $this->S3Client->createBucket([
+            return $this->client->createBucket([
                 'Bucket' => $bucket,
             ]);
-            return $bucket;
         } catch (AwsException $awsException) {
             return false;
         }
@@ -92,9 +80,7 @@ class S3Client extends Component
      */
     public function putObjectByPath(string $localObjectPath, string $storageSavePath = null, string $bucket = null, array $meta = [], array $tags = [])
     {
-        if (is_null($bucket)) {
-            $bucket = $this->defaultBucket;
-        }
+        $bucket = $bucket ?? $this->defaultBucket;
 
         if (empty($bucket)) {
             return false;
@@ -109,19 +95,15 @@ class S3Client extends Component
         $meta = $this->cleanMeta($meta);
         $tags = $this->normalizeTags($tags);
 
-
         $storageSavePath = $this->formatStorageSavePath($storageSavePath);
 
-        $result = $this->S3Client->putObject([
+        return $this->client->putObject([
             'Bucket' => $bucket,
             'Key' => $storageSavePath,
             'SourceFile' => $localObjectPath,
             'Metadata' => $meta,
             'Tagging' => $tags,
         ]);
-
-        return $result;
-
     }
 
     /**
@@ -137,9 +119,7 @@ class S3Client extends Component
      */
     public function putObjectByContent(string $content, string $storageSavePath, string $bucket = null, array $meta = [], array $tags = [])
     {
-        if (is_null($bucket)) {
-            $bucket = $this->defaultBucket;
-        }
+        $bucket = $bucket ?? $this->defaultBucket;
 
         if (empty($bucket)) {
             return false;
@@ -150,37 +130,30 @@ class S3Client extends Component
         $meta = $this->cleanMeta($meta);
         $tags = $this->normalizeTags($tags);
 
-
         $storageSavePath = $this->formatStorageSavePath($storageSavePath);
 
-        $result = $this->S3Client->putObject([
+        return $this->client->putObject([
             'Bucket' => $bucket,
             'Key' => $storageSavePath,
             'Body' => $content,
             'Metadata' => $meta,
             'Tagging' => $tags,
         ]);
-
-        return $result;
-
     }
 
+
     /**
-     * get file object from minio/s3 server
-     *
      * @param string $storageSavePath
      * @param string|null $localSaveAsPath
      * @param string|null $bucket
-     * @return bool|mixed
+     * @return mixed|null
      */
     public function getObject(string $storageSavePath, string $localSaveAsPath = null, string $bucket = null)
     {
-        if (is_null($bucket)) {
-            $bucket = $this->defaultBucket;
-        }
+        $bucket = $bucket ?? $this->defaultBucket;
 
         if (empty($bucket)) {
-            return false;
+            return null;
         }
 
         try {
@@ -194,12 +167,11 @@ class S3Client extends Component
                 ];
             }
 
-            $result = $this->S3Client->getObject($param);
+            $result = $this->client->getObject($param);
             return $result['Body'];
         } catch (AwsException $awsException) {
-            return false;
+            return null;
         }
-
     }
 
     /**
@@ -229,7 +201,11 @@ class S3Client extends Component
         return $meta;
     }
 
-    private function normalizeTags(array $tags): string
+    /**
+     * @param array $tags
+     * @return string|null
+     */
+    private function normalizeTags(array $tags)
     {
         if (empty($tags)) return null;
         return http_build_query($tags);

@@ -29,7 +29,7 @@ in ``web.php``
 ```php
 'components'=> [
     's3client' => [
-        'class'=> 'grptx\S3Client',
+        'class'=> 'yareg\S3Client',
         'key' => '<your key>',
         'secret' => '<yout secret>',
         'endpoint'=> '<your endpoint>',
