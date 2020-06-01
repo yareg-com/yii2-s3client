@@ -41,27 +41,36 @@ class S3Client extends Component
     }
 
     /**
-     * @return \Aws\S3\S3Client
-     */
-    private function getClient(): \Aws\S3\S3Client
-    {
-        return $this->client;
-    }
-
-    /**
      * @param String|null $bucket
      * @return bool
      */
-    public function createBucket(String $bucket = null)
+    public function createBucket(string $bucket = null)
     {
         if (is_null($bucket)) {
             return false;
         }
 
         try {
-            return $this->client->createBucket([
-                'Bucket' => $bucket,
-            ]);
+            $this->client->createBucket(['Bucket' => $bucket]);
+            return true;
+        } catch (AwsException $e) {
+            return false;
+        }
+    }
+
+    /**
+     * @param string|null $bucket
+     * @return bool
+     */
+    public function deleteBucket(string $bucket = null)
+    {
+        if (is_null($bucket)) {
+            return false;
+        }
+
+        try {
+            $this->client->deleteBucket(['Bucket' => $bucket]);
+            return true;
         } catch (AwsException $awsException) {
             return false;
         }

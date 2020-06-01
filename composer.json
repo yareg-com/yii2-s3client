@@ -16,6 +16,7 @@
         "minio",
         "php7"
     ],
+    "prefer-stable": true,
     "minimum-stability": "dev",
     "require": {
         "php": ">=7.0",

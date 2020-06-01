@@ -1,0 +1,11 @@
+yareg_yii2_s3client:
+  image: yareg/yii2-php
+  container_name: yareg_yii2_s3client
+  volumes:
+    # Re-use local composer cache via host-volume
+    - ~/.composer-docker/cache:/root/.composer/cache:delegated
+    # Mount composer auth file
+    #- ./docker/composer-auth.json:/root/.composer/auth.json:ro
+    # Mount source-code for development
+    - ./:/app
+  restart: unless-stopped
