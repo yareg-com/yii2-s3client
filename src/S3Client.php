@@ -55,7 +55,7 @@ class S3Client extends Component
     public function listBuckets() {
         try {
             $data = $this->client->listBuckets();
-            if (is_array($data) && $data[self::BUCKETS]) {
+            if ($data[self::BUCKETS]) {
                 return $data[self::BUCKETS];
             }
             return [];
