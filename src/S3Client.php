@@ -9,6 +9,8 @@ use yii\base\Component;
 
 class S3Client extends Component
 {
+    const BUCKETS = 'Buckets';
+
     /** @var \Aws\S3\S3Client */
     private $client;
 
@@ -39,10 +41,14 @@ class S3Client extends Component
     }
 
     /**
-     * @return mixed
+     * @return array|mixed
      */
     public function listBuckets() {
-        return $this->client->listBuckets()['Buckets'];
+        $data = $this->client->listBuckets();
+        if (is_array($data) && $data[self::BUCKETS]) {
+            return $data[self::BUCKETS];
+        }
+        return [];
     }
 
     /**
