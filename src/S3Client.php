@@ -44,11 +44,15 @@ class S3Client extends Component
      * @return array|mixed
      */
     public function listBuckets() {
-        $data = $this->client->listBuckets();
-        if (is_array($data) && $data[self::BUCKETS]) {
-            return $data[self::BUCKETS];
+        try {
+            $data = $this->client->listBuckets();
+            if (is_array($data) && $data[self::BUCKETS]) {
+                return $data[self::BUCKETS];
+            }
+            return [];
+        } catch (AwsException $e) {
+            return [];
         }
-        return [];
     }
 
     /**
@@ -85,6 +89,11 @@ class S3Client extends Component
         } catch (AwsException $awsException) {
             return false;
         }
+    }
+
+    public function getBucketPolicy()
+    {
+
     }
 
     /**
