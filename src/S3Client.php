@@ -15,12 +15,10 @@ class S3Client extends Component
     public $key;
     public $secret;
     public $region;
-    public $version = 'latest';
     public $endpoint;
-    public $profile = 'default';
-    public $defaultBucket;
-    public $debug = false;
-    public $http = ['verify' => true];
+    public $version = 'latest';
+    public $http    = ['verify' => true];
+    public $debug   = false;
 
     public function init()
     {
@@ -28,23 +26,30 @@ class S3Client extends Component
 
         $this->client = new \Aws\S3\S3Client([
             'credentials' => [
-                'key'    => $this->key ?? '',
-                'secret' => $this->secret ?? '',
+                'key'    => $this->key,
+                'secret' => $this->secret,
             ],
-            'region'                  => $this->region ?? '',
-            'version'                 => $this->version ?? 'latest',
-            'endpoint'                => $this->endpoint ?? '',
+            'region'                  => $this->region,
+            'endpoint'                => $this->endpoint,
+            'version'                 => $this->version,
             'use_path_style_endpoint' => true,
-            'debug'                   => $this->debug,
-            'http'                    => $this->http
+            'http'                    => $this->http,
+            'debug'                   => $this->debug
         ]);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function listBuckets() {
+        return $this->client->listBuckets()['Buckets'];
     }
 
     /**
      * @param String|null $bucket
      * @return bool
      */
-    public function createBucket(string $bucket = null)
+    public function createBucket(string $bucket)
     {
         if (is_null($bucket)) {
             return false;
@@ -62,7 +67,7 @@ class S3Client extends Component
      * @param string|null $bucket
      * @return bool
      */
-    public function deleteBucket(string $bucket = null)
+    public function deleteBucket(string $bucket)
     {
         if (is_null($bucket)) {
             return false;
@@ -77,127 +82,98 @@ class S3Client extends Component
     }
 
     /**
-     * put file to minio/s3 server
+     * Put file to minio/s3 server
      *
-     * @param string $localObjectPath full path to file to put
-     * @param string|null $storageSavePath full path to file in bucket (optional)
+     * @param string $filePath full path to file to put
+     * @param string|null $key full path to file in bucket (optional)
      * @param string|null $bucket the bucket name (optional)
      * @param array $meta
      * @param array $tags
      * @return Result|bool
      * @throws AcmException
      */
-    public function putObjectByPath(string $localObjectPath, string $storageSavePath = null, string $bucket = null, array $meta = [], array $tags = [])
+    public function putFile(
+        string $filePath,
+        string $bucket,
+        string $key,
+        array  $meta = [],
+        array  $tags = [])
     {
-        $bucket = $bucket ?? $this->defaultBucket;
-
-        if (empty($bucket)) {
+        if (is_null($filePath) || is_null($bucket) || is_null($key)) {
             return false;
         }
 
-        $this->createBucket($bucket);
-
-        if ($storageSavePath === null) {
-            $storageSavePath = $localObjectPath;
-        }
-
-        $meta = $this->cleanMeta($meta);
-        $tags = $this->normalizeTags($tags);
-
-        $storageSavePath = $this->formatStorageSavePath($storageSavePath);
-
         return $this->client->putObject([
-            'Bucket' => $bucket,
-            'Key' => $storageSavePath,
-            'SourceFile' => $localObjectPath,
-            'Metadata' => $meta,
-            'Tagging' => $tags,
+            'Bucket'     => $bucket,
+            'Key'        => $key,
+            'SourceFile' => $filePath,
+            'Metadata'   => $this->buildMeta($meta),
+            'Tagging'    => $this->buildTags($tags)
         ]);
     }
 
     /**
-     * create and put a file into minio/s3 server with the specified content
+     * Create and put a file into minio/s3 server with the specified content
      *
      * @param string $content
-     * @param string $storageSavePath
+     * @param string $key
      * @param string $bucket
      * @param array $meta
      * @param array $tags
      * @return Result|bool
      * @throws AcmException
      */
-    public function putObjectByContent(string $content, string $storageSavePath, string $bucket = null, array $meta = [], array $tags = [])
+    public function putContent(
+        string $content,
+        string $bucket,
+        string $key,
+        array  $meta = [],
+        array  $tags = [])
     {
-        $bucket = $bucket ?? $this->defaultBucket;
-
-        if (empty($bucket)) {
+        if (is_null($content) || is_null($bucket) || is_null($key)) {
             return false;
         }
 
-        $this->createBucket($bucket);
-
-        $meta = $this->cleanMeta($meta);
-        $tags = $this->normalizeTags($tags);
-
-        $storageSavePath = $this->formatStorageSavePath($storageSavePath);
-
         return $this->client->putObject([
-            'Bucket' => $bucket,
-            'Key' => $storageSavePath,
-            'Body' => $content,
-            'Metadata' => $meta,
-            'Tagging' => $tags,
+            'Bucket'   => $bucket,
+            'Key'      => $key,
+            'Body'     => $content,
+            'Metadata' => $this->buildMeta($meta),
+            'Tagging'  => $this->buildTags($tags)
         ]);
     }
 
-
     /**
-     * @param string $storageSavePath
-     * @param string|null $localSaveAsPath
+     * Get object and optionally save it as a file
+     *
      * @param string|null $bucket
+     * @param string $key
+     * @param string|null $saveAs
      * @return mixed|null
      */
-    public function getObject(string $storageSavePath, string $localSaveAsPath = null, string $bucket = null)
+    public function getObject(string $bucket, string $key, string $saveAs = null)
     {
-        $bucket = $bucket ?? $this->defaultBucket;
-
-        if (empty($bucket)) {
-            return null;
-        }
-
         try {
             $param = [
                 'Bucket' => $bucket,
-                'Key' => $storageSavePath,
+                'Key'    => $key,
             ];
-            if (!is_null($localSaveAsPath)) {
-                $param[] = [
-                    'SaveAs' => $localSaveAsPath
-                ];
+
+            if (!is_null($saveAs)) {
+                $param['SaveAs'] = $saveAs;
             }
 
-            $result = $this->client->getObject($param);
-            return $result['Body'];
+            return $this->client->getObject($param)['Body'];
         } catch (AwsException $awsException) {
             return null;
         }
     }
 
     /**
-     * @param string $storageSavePath
-     * @return string
-     * @author klinson <klinson@163.com>
-     */
-    private function formatStorageSavePath(string $storageSavePath)
-    {
-        return trim($storageSavePath, '/');
-    }
-
-    /**
      * @param array $meta
      * @return array
      */
-    private function cleanMeta(array $meta): array
+    private function buildMeta(array $meta): array
     {
         if (!empty($meta)) {
             foreach ($meta as $k => $v) {
@@ -214,7 +190,7 @@ class S3Client extends Component
      * @param array $tags
      * @return string|null
      */
-    private function normalizeTags(array $tags)
+    private function buildTags(array $tags)
     {
         if (empty($tags)) return null;
         return http_build_query($tags);

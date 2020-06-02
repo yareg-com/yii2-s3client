@@ -49,34 +49,38 @@ in ``web.php``
 $s3client = Yii::$app->s3client;
 
 /**
- * put file to minio/s3 server
- * 
- * @param string $localObjectPath full path to file to put
- * @param string|null $storageSavePath full path to file in bucket (optional)
+ * Put file to minio/s3 server
+ *
+ * @param string $filePath full path to file to put
+ * @param string|null $key full path to file in bucket (optional)
  * @param string|null $bucket the bucket name (optional)
- * @param array $meta (optional)
+ * @param array $meta
+ * @param array $tags
  * @return Result|bool
+ * @throws AcmException
  */
-$s3client->putObjectByPath(string $localObjectPath, string $storageSavePath = null, string $bucket = null, array $meta = []);
+$s3client->putFile(string $filePath, string $bucket, string $key, array  $meta = [], array  $tags = []);
 
 /**
  * create and put a file into minio/s3 server with the specified content
- * 
+ *
  * @param string $content
- * @param string $storageSavePath
+ * @param string $key
  * @param string $bucket
  * @param array $meta
+ * @param array $tags
  * @return Result|bool
+ * @throws AcmException
  */
-$s3client->putObjectByContent(string $content, string $storageSavePath, string $bucket = null, array $meta = []);
+$s3client->putContent(string $content, string $bucket, string $key, array  $meta = [], array  $tags = []);
 
 /**
- * get file object from minio/s3 server 
- * 
- * @param string $storageSavePath
- * @param string|null $localSaveAsPath
+ * Get object and optionally save it as a file
+ *
  * @param string|null $bucket
- * @return bool|mixed
+ * @param string $key
+ * @param string|null $saveAs
+ * @return mixed|null
  */
-$s3client->getObject(string $storageSavePath, string $localSaveAsPath = null, string $bucket = null)
+$s3client->getObject(string $bucket, string $key, string $saveAs = null)
 ```
