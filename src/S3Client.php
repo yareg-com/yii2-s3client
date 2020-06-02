@@ -10,6 +10,7 @@ use yii\base\Component;
 class S3Client extends Component
 {
     const BUCKETS = 'Buckets';
+    const BUCKET  = 'Bucket';
 
     /** @var \Aws\S3\S3Client */
     private $client;
@@ -41,6 +42,14 @@ class S3Client extends Component
     }
 
     /**
+     * @return \Aws\S3\S3Client
+     */
+    public function getClient(): \Aws\S3\S3Client
+    {
+        return $this->client;
+    }
+
+    /**
      * @return array|mixed
      */
     public function listBuckets() {
@@ -66,7 +75,7 @@ class S3Client extends Component
         }
 
         try {
-            $this->client->createBucket(['Bucket' => $bucket]);
+            $this->client->createBucket([self::BUCKET => $bucket]);
             return true;
         } catch (AwsException $e) {
             return false;
@@ -84,16 +93,25 @@ class S3Client extends Component
         }
 
         try {
-            $this->client->deleteBucket(['Bucket' => $bucket]);
+            $this->client->deleteBucket([self::BUCKET => $bucket]);
             return true;
         } catch (AwsException $awsException) {
             return false;
         }
     }
 
-    public function getBucketPolicy()
+    public function getBucketPolicy(string $bucket)
     {
+        if (is_null($bucket)) {
+            return null;
+        }
 
+        try {
+            $data = $this->client->getBucketPolicy([self::BUCKET => $bucket]);
+            return $data;
+        } catch (AwsException $awsException) {
+            return null;
+        }
     }
 
     /**
