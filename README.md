@@ -32,8 +32,7 @@ in ``web.php``
         'key' => '<your key>',
         'secret' => '<yout secret>',
         'endpoint'=> '<your endpoint>',
-        'region' => '<your region>', 
-        'defaultBucket' => '<bucket>', //optional default bucket
+        'region' => '<your region>',
         'debug' => false, // optional
         'http' => [ //optional
             'verify' => false //use false to self-signed certs
