@@ -26,11 +26,11 @@ to the require section of your `composer.json` file and execute `php composer.ph
 in ``web.php``
 
 ```php
-'components'=> [
+'components' => [
     's3client' => [
         'class'=> 'yareg\S3Client',
         'key' => '<your key>',
-        'secret' => '<yout secret>',
+        'secret' => '<your secret>',
         'endpoint'=> '<your endpoint>',
         'region' => '<your region>',
         'debug' => false, // optional

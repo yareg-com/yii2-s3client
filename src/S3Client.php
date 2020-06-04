@@ -100,11 +100,7 @@ class S3Client extends Component
         }
     }
 
-    /**
-     * @param string $bucket
-     * @return Result|null
-     */
-    public function getBucketPolicy(string $bucket)
+    /*public function getBucketPolicy(string $bucket)
     {
         if (is_null($bucket)) {
             return null;
@@ -116,7 +112,7 @@ class S3Client extends Component
         } catch (AwsException $awsException) {
             return null;
         }
-    }
+    }*/
 
     /**
      * Put file to minio/s3 server
