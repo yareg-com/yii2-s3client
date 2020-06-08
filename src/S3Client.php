@@ -115,15 +115,12 @@ class S3Client extends Component
     }*/
 
     /**
-     * Put file to minio/s3 server
-     *
-     * @param string $filePath full path to file to put
-     * @param string $bucket bucket name
-     * @param string $key full path to file in bucket
+     * @param string $filePath
+     * @param string $bucket
+     * @param string $key
      * @param array $meta
      * @param array $tags
-     * @return Result|bool
-     * @throws AcmException
+     * @return bool
      */
     public function putFile(
         string $filePath,
@@ -136,25 +133,27 @@ class S3Client extends Component
             return false;
         }
 
-        return $this->client->putObject([
-            'Bucket'     => $bucket,
-            'Key'        => $key,
-            'SourceFile' => $filePath,
-            'Metadata'   => $this->buildMeta($meta),
-            'Tagging'    => $this->buildTags($tags)
-        ]);
+        try {
+            $this->client->putObject([
+                'Bucket'     => $bucket,
+                'Key'        => $key,
+                'SourceFile' => $filePath,
+                'Metadata'   => $this->buildMeta($meta),
+                'Tagging'    => $this->buildTags($tags)
+            ]);
+            return true;
+        } catch (AwsException $e) {
+            return false;
+        }
     }
 
     /**
-     * Create and put a file into minio/s3 server with the specified content
-     *
      * @param string $content
      * @param string $bucket
      * @param string $key
      * @param array $meta
      * @param array $tags
-     * @return Result|bool
-     * @throws AcmException
+     * @return bool
      */
     public function putContent(
         string $content,
@@ -167,18 +166,21 @@ class S3Client extends Component
             return false;
         }
 
-        return $this->client->putObject([
-            'Bucket'   => $bucket,
-            'Key'      => $key,
-            'Body'     => $content,
-            'Metadata' => $this->buildMeta($meta),
-            'Tagging'  => $this->buildTags($tags)
-        ]);
+        try {
+            $this->client->putObject([
+                'Bucket' => $bucket,
+                'Key' => $key,
+                'Body' => $content,
+                'Metadata' => $this->buildMeta($meta),
+                'Tagging' => $this->buildTags($tags)
+            ]);
+            return true;
+        } catch (AwsException $e) {
+            return false;
+        }
     }
 
     /**
-     * Get object and optionally save it as a file
-     *
      * @param string $bucket
      * @param string $key
      * @param string|null $saveAs
@@ -201,7 +203,7 @@ class S3Client extends Component
             }
 
             return $this->client->getObject($param)['Body'];
-        } catch (AwsException $awsException) {
+        } catch (AwsException $e) {
             return null;
         }
     }

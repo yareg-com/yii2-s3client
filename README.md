@@ -48,34 +48,26 @@ in ``web.php``
 $s3client = Yii::$app->s3client;
 
 /**
- * Put file to minio/s3 server
- *
- * @param string $filePath full path to file to put
- * @param string $key full path to file in bucket
- * @param string $bucket bucket name
+ * @param string $filePath
+ * @param string $bucket
+ * @param string $key
  * @param array $meta
  * @param array $tags
- * @return Result|bool
- * @throws AcmException
+ * @return bool
  */
 $s3client->putFile(string $filePath, string $bucket, string $key, array  $meta = [], array  $tags = []);
 
 /**
- * Create and put a file into minio/s3 server with the specified content
- *
  * @param string $content
  * @param string $bucket
  * @param string $key
  * @param array $meta
  * @param array $tags
- * @return Result|bool
- * @throws AcmException
+ * @return bool
  */
 $s3client->putContent(string $content, string $bucket, string $key, array  $meta = [], array  $tags = []);
 
 /**
- * Get object and optionally save it as a file
- *
  * @param string $bucket
  * @param string $key
  * @param string|null $saveAs
