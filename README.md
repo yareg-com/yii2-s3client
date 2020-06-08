@@ -51,8 +51,8 @@ $s3client = Yii::$app->s3client;
  * Put file to minio/s3 server
  *
  * @param string $filePath full path to file to put
- * @param string|null $key full path to file in bucket (optional)
- * @param string|null $bucket the bucket name (optional)
+ * @param string $key full path to file in bucket
+ * @param string $bucket bucket name
  * @param array $meta
  * @param array $tags
  * @return Result|bool
@@ -61,11 +61,11 @@ $s3client = Yii::$app->s3client;
 $s3client->putFile(string $filePath, string $bucket, string $key, array  $meta = [], array  $tags = []);
 
 /**
- * create and put a file into minio/s3 server with the specified content
+ * Create and put a file into minio/s3 server with the specified content
  *
  * @param string $content
- * @param string $key
  * @param string $bucket
+ * @param string $key
  * @param array $meta
  * @param array $tags
  * @return Result|bool
@@ -76,7 +76,7 @@ $s3client->putContent(string $content, string $bucket, string $key, array  $meta
 /**
  * Get object and optionally save it as a file
  *
- * @param string|null $bucket
+ * @param string $bucket
  * @param string $key
  * @param string|null $saveAs
  * @return mixed|null

@@ -118,8 +118,8 @@ class S3Client extends Component
      * Put file to minio/s3 server
      *
      * @param string $filePath full path to file to put
-     * @param string|null $key full path to file in bucket (optional)
-     * @param string|null $bucket the bucket name (optional)
+     * @param string $bucket bucket name
+     * @param string $key full path to file in bucket
      * @param array $meta
      * @param array $tags
      * @return Result|bool
@@ -149,8 +149,8 @@ class S3Client extends Component
      * Create and put a file into minio/s3 server with the specified content
      *
      * @param string $content
-     * @param string $key
      * @param string $bucket
+     * @param string $key
      * @param array $meta
      * @param array $tags
      * @return Result|bool
@@ -179,13 +179,17 @@ class S3Client extends Component
     /**
      * Get object and optionally save it as a file
      *
-     * @param string|null $bucket
+     * @param string $bucket
      * @param string $key
      * @param string|null $saveAs
      * @return mixed|null
      */
     public function getObject(string $bucket, string $key, string $saveAs = null)
     {
+        if (is_null($bucket) || is_null($key)) {
+            return null;
+        }
+
         try {
             $param = [
                 'Bucket' => $bucket,
