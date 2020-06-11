@@ -15,6 +15,9 @@ class S3Client extends Component
     const SOURCE_FILE = 'SourceFile';
     const METADATA    = 'Metadata';
     const TAGGING     = 'Tagging';
+    const DELETE      = 'Delete';
+    const SAVE_AS     = 'SaveAs';
+    const OBJECTS     = 'Objects';
 
     /** @var \Aws\S3\S3Client */
     private $client;
@@ -144,6 +147,40 @@ class S3Client extends Component
      */
 
     /**
+     * @param string $bucket
+     * @param string $key
+     * @param string|null $saveAs
+     * @return mixed|null
+     */
+    public function getObject(string $bucket, string $key, string $saveAs = null)
+    {
+        try {
+            $param = [
+                self::BUCKET => $bucket,
+                self::KEY    => $key,
+            ];
+
+            if (!is_null($saveAs)) {
+                $param[self::SAVE_AS] = $saveAs;
+            }
+
+            return $this->client->getObject($param)[self::BODY];
+        } catch (AwsException $e) {
+            return null;
+        }
+    }
+
+    /**
+     * @param string $bucket
+     * @param string $key
+     * @return bool
+     */
+    public function objectExists(string $bucket, string $key)
+    {
+        return $this->client->doesObjectExist($bucket, $key);
+    }
+
+    /**
      * @param string $filePath
      * @param string $bucket
      * @param string $key
@@ -203,25 +240,28 @@ class S3Client extends Component
 
     /**
      * @param string $bucket
-     * @param string $key
-     * @param string|null $saveAs
-     * @return mixed|null
+     * @param array $keys
+     * @return bool
      */
-    public function getObject(string $bucket, string $key, string $saveAs = null)
+    public function deleteObjects(string $bucket, array $keys = [])
     {
+        if (empty($keys)) {
+            return false;
+        }
+
+        $objects = [];
+        foreach($keys as $key) {
+            $objects[] = [self::KEY => $key];
+        }
+
         try {
-            $param = [
+            $this->client->deleteObjects([
                 self::BUCKET => $bucket,
-                self::KEY    => $key,
-            ];
-
-            if (!is_null($saveAs)) {
-                $param['SaveAs'] = $saveAs;
-            }
-
-            return $this->client->getObject($param)[self::BODY];
+                self::DELETE => [self::OBJECTS => $objects]
+            ]);
+            return true;
         } catch (AwsException $e) {
-            return null;
+            return false;
         }
     }
 

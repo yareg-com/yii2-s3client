@@ -109,4 +109,18 @@ $s3client->putContent(string $content, string $bucket, string $key, array  $meta
  * @return mixed|null
  */
 $s3client->getObject(string $bucket, string $key, string $saveAs = null)
+
+/**
+ * @param string $bucket
+ * @param string $key
+ * @return bool
+ */
+$s3client->objectExists(string $bucket, string $key)
+
+/**
+ * @param string $bucket
+ * @param array $keys
+ * @return bool
+ */
+$s3client->deleteObjects(string $bucket, array $keys = [])
 ```
