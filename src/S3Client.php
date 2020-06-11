@@ -2,15 +2,19 @@
 
 namespace yareg;
 
-use Aws\Acm\Exception\AcmException;
 use Aws\Exception\AwsException;
-use Aws\Result;
 use yii\base\Component;
 
 class S3Client extends Component
 {
-    const BUCKETS = 'Buckets';
-    const BUCKET  = 'Bucket';
+    const BUCKETS     = 'Buckets';
+    const BUCKET      = 'Bucket';
+    const POLICY      = 'Policy';
+    const KEY         = 'Key';
+    const BODY        = 'Body';
+    const SOURCE_FILE = 'SourceFile';
+    const METADATA    = 'Metadata';
+    const TAGGING     = 'Tagging';
 
     /** @var \Aws\S3\S3Client */
     private $client;
@@ -49,6 +53,13 @@ class S3Client extends Component
         return $this->client;
     }
 
+    /* -----------------------------------------------------------------------------------------------------------------
+     *
+     *  BUCKET OPERATIONS
+     *
+     * -----------------------------------------------------------------------------------------------------------------
+     */
+
     /**
      * @return array|mixed
      */
@@ -65,15 +76,11 @@ class S3Client extends Component
     }
 
     /**
-     * @param String|null $bucket
+     * @param string $bucket
      * @return bool
      */
     public function createBucket(string $bucket)
     {
-        if (is_null($bucket)) {
-            return false;
-        }
-
         try {
             $this->client->createBucket([self::BUCKET => $bucket]);
             return true;
@@ -83,15 +90,11 @@ class S3Client extends Component
     }
 
     /**
-     * @param string|null $bucket
+     * @param string $bucket
      * @return bool
      */
     public function deleteBucket(string $bucket)
     {
-        if (is_null($bucket)) {
-            return false;
-        }
-
         try {
             $this->client->deleteBucket([self::BUCKET => $bucket]);
             return true;
@@ -100,19 +103,45 @@ class S3Client extends Component
         }
     }
 
-    /*public function getBucketPolicy(string $bucket)
+    /**
+     * @param string $bucket
+     * @return bool
+     */
+    public function publishBucket(string $bucket)
     {
-        if (is_null($bucket)) {
-            return null;
-        }
-
         try {
-            $data = $this->client->getBucketPolicy([self::BUCKET => $bucket]);
-            return $data;
+            $this->client->putBucketPolicy([
+                self::BUCKET => $bucket,
+                self::POLICY => self::createPublicPolicy($bucket)
+            ]);
+            return true;
         } catch (AwsException $awsException) {
-            return null;
+            return false;
         }
-    }*/
+    }
+
+    /**
+     * @param string $bucket
+     * @return bool
+     */
+    public function deleteBucketPolicy(string $bucket)
+    {
+        try {
+            $this->client->deleteBucketPolicy([
+                self::BUCKET => $bucket
+            ]);
+            return true;
+        } catch (AwsException $e) {
+            return false;
+        }
+    }
+
+    /* -----------------------------------------------------------------------------------------------------------------
+     *
+     *  OBJECT OPERATIONS
+     *
+     * -----------------------------------------------------------------------------------------------------------------
+     */
 
     /**
      * @param string $filePath
@@ -129,17 +158,13 @@ class S3Client extends Component
         array  $meta = [],
         array  $tags = [])
     {
-        if (is_null($filePath) || is_null($bucket) || is_null($key)) {
-            return false;
-        }
-
         try {
             $this->client->putObject([
-                'Bucket'     => $bucket,
-                'Key'        => $key,
-                'SourceFile' => $filePath,
-                'Metadata'   => $this->buildMeta($meta),
-                'Tagging'    => $this->buildTags($tags)
+                self::BUCKET      => $bucket,
+                self::KEY         => $key,
+                self::SOURCE_FILE => $filePath,
+                self::METADATA    => $this->buildMeta($meta),
+                self::TAGGING     => $this->buildTags($tags)
             ]);
             return true;
         } catch (AwsException $e) {
@@ -162,17 +187,13 @@ class S3Client extends Component
         array  $meta = [],
         array  $tags = [])
     {
-        if (is_null($content) || is_null($bucket) || is_null($key)) {
-            return false;
-        }
-
         try {
             $this->client->putObject([
-                'Bucket' => $bucket,
-                'Key' => $key,
-                'Body' => $content,
-                'Metadata' => $this->buildMeta($meta),
-                'Tagging' => $this->buildTags($tags)
+                self::BUCKET   => $bucket,
+                self::KEY      => $key,
+                self::BODY     => $content,
+                self::METADATA => $this->buildMeta($meta),
+                self::TAGGING  => $this->buildTags($tags)
             ]);
             return true;
         } catch (AwsException $e) {
@@ -188,25 +209,56 @@ class S3Client extends Component
      */
     public function getObject(string $bucket, string $key, string $saveAs = null)
     {
-        if (is_null($bucket) || is_null($key)) {
-            return null;
-        }
-
         try {
             $param = [
-                'Bucket' => $bucket,
-                'Key'    => $key,
+                self::BUCKET => $bucket,
+                self::KEY    => $key,
             ];
 
             if (!is_null($saveAs)) {
                 $param['SaveAs'] = $saveAs;
             }
 
-            return $this->client->getObject($param)['Body'];
+            return $this->client->getObject($param)[self::BODY];
         } catch (AwsException $e) {
             return null;
         }
     }
+
+    /* -----------------------------------------------------------------------------------------------------------------
+     *
+     *  UTILITY METHODS
+     *
+     * -----------------------------------------------------------------------------------------------------------------
+     */
+
+    /**
+     * @param string $bucket
+     * @return false|string
+     */
+    public static function createPublicPolicy(string $bucket)
+    {
+        $policy = [
+            'Version' => '2012-10-17',
+            'Statement' => [
+                [
+                    'Sid'       => 'Public',
+                    'Effect'    => 'Allow',
+                    'Principal' => ['AWS' => ['*']],
+                    'Action'    => ['s3:GetObject'],
+                    'Resource'  => ['arn:aws:s3:::'.$bucket.'/*']
+                ]
+            ]
+        ];
+        return json_encode($policy,JSON_UNESCAPED_SLASHES);
+    }
+
+    /* -----------------------------------------------------------------------------------------------------------------
+     *
+     *  PRIVATE METHODS
+     *
+     * -----------------------------------------------------------------------------------------------------------------
+     */
 
     /**
      * @param array $meta

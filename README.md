@@ -11,12 +11,12 @@ Yii2 S3Client based on [klinson/aws-s3-minio](https://github.com/klinson/aws-s3-
 
 Preferred way to install is through [Composer](https://getcomposer.org): 
 ```shell
-php composer.phar require yareg/yii2-s3client:^1
+php composer.phar require yareg/yii2-s3client:^2
 ```
 Or, you may add
 
 ```php
-"yareg/yii2-s3client": "^1"
+"yareg/yii2-s3client": "^2"
 ```
 
 to the require section of your `composer.json` file and execute `php composer.phar update`.
@@ -46,7 +46,42 @@ in ``web.php``
 ```
 /** @var S3Client $s3client */
 $s3client = Yii::$app->s3client;
+```
+##### Bucket operations
+````
+/**
+ * @return array|mixed
+ */
+$s3client->listBuckets();
 
+/**
+ * @param string $bucket
+ * @return bool
+ */
+$s3client->createBucket('test');
+
+/**
+ * @param string $bucket
+ * @return bool
+ */
+$s3client->deleteBucket('test');
+
+/**
+ * @param string $bucket
+ * @return bool
+ */
+$s3client->publishBucket('test'); // WARNING! Your files will be publicly accessible!
+
+/**
+ * @param string $bucket
+ * @return bool
+ */
+$s3client->deleteBucketPolicy('test'); // May be used to unpublish the bucket
+````
+
+##### Object operations
+
+```
 /**
  * @param string $filePath
  * @param string $bucket
