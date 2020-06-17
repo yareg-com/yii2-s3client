@@ -18,6 +18,8 @@ class S3Client extends Component
     const DELETE      = 'Delete';
     const SAVE_AS     = 'SaveAs';
     const OBJECTS     = 'Objects';
+    const PREFIX      = 'Prefix';
+    const CONTENTS    = 'Contents';
 
     /** @var \Aws\S3\S3Client */
     private $client;
@@ -145,6 +147,24 @@ class S3Client extends Component
      *
      * -----------------------------------------------------------------------------------------------------------------
      */
+
+    /**
+     * @param string $bucket
+     * @param string $prefix
+     */
+    public function listObjects(string $bucket, string $prefix = null)
+    {
+        $objects = [];
+        try {
+            $result = $this->client->listObjectsV2([
+                self::BUCKET => $bucket,
+                self::PREFIX => $prefix
+            ]);
+            return $result[self::CONTENTS];
+        } catch (AwsException $e) {
+            return $objects;
+        }
+    }
 
     /**
      * @param string $bucket
