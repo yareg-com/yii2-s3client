@@ -88,9 +88,10 @@ $s3client->deleteBucketPolicy('test'); // May be used to unpublish the bucket
  * @param string $key
  * @param array $meta
  * @param array $tags
+ * @param array $args
  * @return bool
  */
-$s3client->putFile(string $filePath, string $bucket, string $key, array  $meta = [], array  $tags = []);
+$s3client->putFile(string $filePath, string $bucket, string $key, array $meta = [], array $tags = [], array $args = []);
 
 /**
  * @param string $content
@@ -98,9 +99,10 @@ $s3client->putFile(string $filePath, string $bucket, string $key, array  $meta =
  * @param string $key
  * @param array $meta
  * @param array $tags
+ * @param array $args
  * @return bool
  */
-$s3client->putContent(string $content, string $bucket, string $key, array  $meta = [], array  $tags = []);
+$s3client->putContent(string $content, string $bucket, string $key, array $meta = [], array $tags = [], array $args = []);
 
 /**
  * @param string $bucket
@@ -108,19 +110,25 @@ $s3client->putContent(string $content, string $bucket, string $key, array  $meta
  * @param string|null $saveAs
  * @return mixed|null
  */
-$s3client->getObject(string $bucket, string $key, string $saveAs = null)
+$s3client->getObject(string $bucket, string $key, string $saveAs = null);
+
+/**
+ * @param string $bucket
+ * @param string $prefix
+ */
+$s3client->listObjects(string $bucket, string $prefix = null);
 
 /**
  * @param string $bucket
  * @param string $key
  * @return bool
  */
-$s3client->objectExists(string $bucket, string $key)
+$s3client->objectExists(string $bucket, string $key);
 
 /**
  * @param string $bucket
  * @param array $keys
  * @return bool
  */
-$s3client->deleteObjects(string $bucket, array $keys = [])
+$s3client->deleteObjects(string $bucket, array $keys = []);
 ```

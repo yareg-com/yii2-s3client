@@ -240,6 +240,7 @@ class S3Client extends Component
      * @param string $key
      * @param array $meta
      * @param array $tags
+     * @param array $args
      * @return bool
      */
     public function putContent(
@@ -247,16 +248,20 @@ class S3Client extends Component
         string $bucket,
         string $key,
         array  $meta = [],
-        array  $tags = [])
+        array  $tags = [],
+        array  $args = [])
     {
         try {
-            $this->client->putObject([
+
+            $base = [
                 self::BUCKET   => $bucket,
                 self::KEY      => $key,
                 self::BODY     => $content,
                 self::METADATA => $this->buildMeta($meta),
                 self::TAGGING  => $this->buildTags($tags)
-            ]);
+            ];
+
+            $this->client->putObject(array_merge($base, $args));
             return true;
         } catch (AwsException $e) {
             return false;
